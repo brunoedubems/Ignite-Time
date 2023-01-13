@@ -1,0 +1,23 @@
+
+npm -i eslint -D    → instala o eslint
+ npm -i @rocketseat/eslint-config -D → usa configuração da rocket
+
+
+npx eslint src --ext .ts,.tsx --fix 
+→ ajusta o projeto nos padrões estalecidos
+
+
+ "lint": "eslint src --ext .ts,.tsx --fix"
+ DENTRO DO PACKAGE.JSON COLOCA EM SCRIPT PARA FACILITAR
+
+
+
+
+
+
+
+
+
+
+
+
