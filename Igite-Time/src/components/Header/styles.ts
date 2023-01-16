@@ -10,25 +10,25 @@ export const HeaderContainer = styled.header`
     gap: 0.5rem;
 
     a {
-        width: 3rem;
-        height: 3rem;
+      width: 3rem;
+      height: 3rem;
 
-        display: flex;
-        justify-content: center;
-        align-items: center;
-              
-        color: ${(props) => props.theme['gray-100']};
+      display: flex;
+      justify-content: center;
+      align-items: center;
 
-        border-top: 3px solid transparent;
-        border-bottom: 3px solid transparent;
+      color: ${(props) => props.theme['gray-100']};
 
-        &:hover{
-          border-bottom: 3px solid ${(props) => props.theme['green-500']}
-        }
+      border-top: 3px solid transparent;
+      border-bottom: 3px solid transparent;
 
-        &.active{
-          color: 3px solid ${(props) => props.theme['green-500']}
-        }
+      &:hover {
+        border-bottom: 3px solid ${(props) => props.theme['green-500']};
+      }
+
+      &.active {
+        color: 3px solid ${(props) => props.theme['green-500']};
+      }
     }
   }
 `

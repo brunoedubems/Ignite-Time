@@ -1,109 +1,86 @@
-import { ReactNode, createContext, useState } from "react";
+import { ReactNode, createContext, useState, useReducer } from 'react'
+import { Cycle, cyclesReducer } from '../reducers/cycles/reducer'
+import {
+  addNewCycleAction,
+  interruptCycleAsFinishedAction,
+  markCurrentCycleAsFinishedAction,
+} from '../reducers/cycles/actions'
 
-interface CreateCycleData{
-    task: string;
-    minutesAmount: number;
+interface CreateCycleData {
+  task: string
+  minutesAmount: number
 }
-
-interface Cycle {
-    id: string;
-    task: string;
-    minutesAmount: number;
-    startDate: Date;
-    interruptedDate?: Date;
-    finishedDate?: Date;
-  }
-  
-
 
 interface CyclesContextType {
-  cycles: Cycle[];
-    activeCycle:Cycle | undefined
-    activeCycleId: string | null
-    amountSecondsPassed: number
-    markCurrentCycleAsFinished: () => void
-    setSecondsPassed: (seconds: number) => void
-    createNewCycle:(data:CreateCycleData) => void
-    interruptCurrentCycle: () => void
-    }
-    
-
-export const CyclesContext = createContext({} as CyclesContextType);
-
-interface CyclesContextProviderProps{
-    children: ReactNode;
+  cycles: Cycle[]
+  activeCycle: Cycle | undefined
+  activeCycleId: string | null
+  amountSecondsPassed: number
+  markCurrentCycleAsFinished: () => void
+  setSecondsPassed: (seconds: number) => void
+  createNewCycle: (data: CreateCycleData) => void
+  interruptCurrentCycle: () => void
 }
 
-export function CyclesContextProvider({ children}:CyclesContextProviderProps){
-    const [cycles, setCycles] = useState<Cycle[]>([]);
-    const [activeCycleId, setActiveCycleId] = useState<string | null>(null);
-    const [amountSecondsPassed, setAmountSecondsPassed] = useState(0);
- 
-const activeCycle = cycles.find((cycle) => cycle.id === activeCycleId);
- 
-function setSecondsPassed(seconds: number){
+export const CyclesContext = createContext({} as CyclesContextType)
+
+interface CyclesContextProviderProps {
+  children: ReactNode
+}
+
+export function CyclesContextProvider({
+  children,
+}: CyclesContextProviderProps) {
+  const [cyclesState, dispatch] = useReducer(cyclesReducer, {
+    cycles: [],
+    activeCycleId: null,
+  })
+
+  const [amountSecondsPassed, setAmountSecondsPassed] = useState(0)
+
+  const { cycles, activeCycleId } = cyclesState
+
+  const activeCycle = cycles.find((cycle) => cycle.id === activeCycleId)
+
+  function setSecondsPassed(seconds: number) {
     setAmountSecondsPassed(seconds)
   }
- 
-  function markCurrentCycleAsFinished(){
-    setCycles(state => state.map((cycle) => {
-      if (cycle.id === activeCycleId) {
-        return { ...cycle, finishedDate: new Date() };
-      } else {
-        return cycle;
-      }
-    }),)
- }
- 
- 
-  /*função quando submit*/
+
+  function markCurrentCycleAsFinished() {
+    dispatch(markCurrentCycleAsFinishedAction)
+  }
+
+  /* função quando submit */
   function createNewCycle(data: CreateCycleData) {
     const newCycle: Cycle = {
       id: String(new Date().getTime()),
       task: data.task,
       minutesAmount: data.minutesAmount,
       startDate: new Date(),
-    };
+    }
 
-    setCycles((state) => [...state, newCycle]);
-    setActiveCycleId(newCycle.id);
-    setAmountSecondsPassed(0);
-
-   // reset();
+    dispatch(addNewCycleAction(newCycle))
+    setAmountSecondsPassed(0)
   }
-
 
   function interruptCurrentCycle() {
-    // setCycles(cycles.map((cycle) => {
-    setCycles(state => state.map((cycle) => {
-        if (cycle.id === activeCycleId) {
-          return { ...cycle, interruptedDate: new Date() };
-        } else {
-          return cycle;
-        }
-      }),
-    );
-
-    setActiveCycleId(null);
+    dispatch(interruptCycleAsFinishedAction)
   }
 
-
-   return(
-    <CyclesContext.Provider value={{ 
+  return (
+    <CyclesContext.Provider
+      value={{
         cycles,
-        activeCycle, 
-        activeCycleId, 
-        markCurrentCycleAsFinished, 
-        amountSecondsPassed ,
+        activeCycle,
+        activeCycleId,
+        markCurrentCycleAsFinished,
+        amountSecondsPassed,
         setSecondsPassed,
         createNewCycle,
-        interruptCurrentCycle
-        }}>
-    {children}
-        </CyclesContext.Provider>
-   ) 
+        interruptCurrentCycle,
+      }}
+    >
+      {children}
+    </CyclesContext.Provider>
+  )
 }
-
-
-
-
