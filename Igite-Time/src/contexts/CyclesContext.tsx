@@ -1,18 +1,18 @@
+import { differenceInSeconds } from 'date-fns'
 import {
-  ReactNode,
   createContext,
-  useState,
-  useReducer,
+  ReactNode,
   useEffect,
+  useReducer,
+  useState,
 } from 'react'
-import { Cycle, cyclesReducer } from '../reducers/cycles/reducer'
 import {
   addNewCycleAction,
-  interruptCycleAsFinishedAction,
+  deleteCycleAction,
+  interruptCurrentCycleAction,
   markCurrentCycleAsFinishedAction,
 } from '../reducers/cycles/actions'
-import { json } from 'react-router-dom'
-import { differenceInSeconds } from 'date-fns'
+import { Cycle, cyclesReducer } from '../reducers/cycles/reducer'
 
 interface CreateCycleData {
   task: string
@@ -28,6 +28,7 @@ interface CyclesContextType {
   setSecondsPassed: (seconds: number) => void
   createNewCycle: (data: CreateCycleData) => void
   interruptCurrentCycle: () => void
+  deleteCycle: (cycleId: string) => void
 }
 
 export const CyclesContext = createContext({} as CyclesContextType)
@@ -46,11 +47,18 @@ export function CyclesContextProvider({
       activeCycleId: null,
     },
     () => {
-      const storeStateAsJSON = localStorage.getItem(
-        '@ignite-timer:cycles-state-1.0.0',
+      // função para setar valor inicial no reducer (opcional)
+      const storageStateAsJSON = localStorage.getItem(
+        '@ignite-timer:cycles-state-1.0.1',
       )
-      if (storeStateAsJSON) {
-        return JSON.parse(storeStateAsJSON)
+
+      if (storageStateAsJSON) {
+        return JSON.parse(storageStateAsJSON)
+      }
+
+      return {
+        cycles: [],
+        activeCycleId: null,
       }
     },
   )
@@ -68,6 +76,7 @@ export function CyclesContextProvider({
 
   useEffect(() => {
     const stateJSON = JSON.stringify(cyclesState)
+
     localStorage.setItem('@ignite-timer:cycles-state-1.0.0', stateJSON)
   }, [cyclesState])
 
@@ -75,25 +84,31 @@ export function CyclesContextProvider({
     setAmountSecondsPassed(seconds)
   }
 
-  function markCurrentCycleAsFinished() {
-    dispatch(markCurrentCycleAsFinishedAction)
-  }
-
-  /* função quando submit */
   function createNewCycle(data: CreateCycleData) {
+    const id = String(new Date().getTime())
+
     const newCycle: Cycle = {
-      id: String(new Date().getTime()),
+      id,
       task: data.task,
       minutesAmount: data.minutesAmount,
       startDate: new Date(),
     }
 
     dispatch(addNewCycleAction(newCycle))
+
     setAmountSecondsPassed(0)
   }
 
   function interruptCurrentCycle() {
-    dispatch(interruptCycleAsFinishedAction)
+    dispatch(interruptCurrentCycleAction())
+  }
+
+  function markCurrentCycleAsFinished() {
+    dispatch(markCurrentCycleAsFinishedAction())
+  }
+
+  function deleteCycle(cycleId: string) {
+    dispatch(deleteCycleAction(cycleId))
   }
 
   return (
@@ -107,6 +122,7 @@ export function CyclesContextProvider({
         setSecondsPassed,
         createNewCycle,
         interruptCurrentCycle,
+        deleteCycle,
       }}
     >
       {children}

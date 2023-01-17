@@ -8,7 +8,7 @@ import {
   StartCountdownButton,
   StopCountdownButton,
 } from './styles'
-import { NewCyclesForm } from './components/NewCycleForm'
+import { NewCycleForm } from './components/NewCycleForm'
 import { Countdown } from './components/Countdown'
 import { CyclesContext } from '../../contexts/CyclesContext'
 
@@ -20,10 +20,6 @@ const newCycleFormValidationSchema = zod.object({
     .max(60, 'O ciclo precisa ser no máximo de 60 minutos.'),
 })
 
-// interface NewCycleFormData{
-//   task: string;
-//   minutesAmount: number;
-// }
 type NewCycleFormData = zod.infer<typeof newCycleFormValidationSchema>
 
 export function Home() {
@@ -33,7 +29,7 @@ export function Home() {
   const newCycleForm = useForm<NewCycleFormData>({
     resolver: zodResolver(newCycleFormValidationSchema),
     defaultValues: {
-      task: ' ',
+      task: '',
       minutesAmount: 0,
     },
   })
@@ -51,7 +47,7 @@ export function Home() {
     <HomeContainer>
       <form onSubmit={handleSubmit(handleCreateNewCycle)} action="">
         <FormProvider {...newCycleForm}>
-          <NewCyclesForm />
+          <NewCycleForm />
         </FormProvider>
         <Countdown />
 
